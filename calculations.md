@@ -1,22 +1,25 @@
-# Baseball Statistics PRD: `calculations.md`
+# Men’s Slowpitch Softball Statistics PRD: `calculations.md`
 
-This document defines the **core, commonly used baseball player and pitcher statistics** to support future calculation logic. It intentionally **omits advanced sabermetrics** (e.g., wRC+, WAR, FIP, xwOBA) and focuses on traditional box-score stats and a few widely understood rate stats.
+This document defines the **core statistics and formulas for men’s slowpitch softball** used by this app. It is intentionally focused on the **simplest, most common stats** a recreational slowpitch team cares about.
 
-All formulas are written in conceptual form, not implementation form (e.g., rounding rules and edge-case handling are left to code design).
+All formulas are written conceptually (rounding, null-handling, and edge cases are left to implementation). This file should be treated as the **source of truth for stat names and formulas**.
 
 ---
 
 ## 1. Core Counting Stats (Batters)
 
+These are the basic per-player counting stats tracked by the scorer during and after each game.
+
 - **Games Played (`G`)**  
-  Number of games in which the player appears.
+  Number of games in which the player appears for at least one plate appearance or defensive inning.
 
 - **Plate Appearances (`PA`)**  
   Total completed batting turns:  
-  `PA = AB + BB + HBP + SF + SH + other rule-based appearances`
+  `PA = AB + BB + HBP + other rule-based appearances (league-specific)`
 
 - **At Bats (`AB`)**  
-  Plate appearances **excluding** walks, hit-by-pitch, sacrifices, catcher interference, etc.
+  Plate appearances **excluding** walks and hit-by-pitch.  
+  (Sacrifice bunts/flies are rare in men’s slowpitch and can be folded into outs; no special stat needed.)
 
 - **Hits (`H`)**  
   Any fair ball allowing the batter to reach at least first base **without** an error or fielder's choice.
@@ -32,45 +35,34 @@ All formulas are written in conceptual form, not implementation form (e.g., roun
   Hits where batter safely reaches third base.
 
 - **Home Runs (`HR`)**  
-  Hits where batter scores on the play.
+  Hits where batter scores on the play (over-the-fence or inside-the-park, per league scoring rules).
 
 - **Runs (`R`)**  
   Times the player safely crosses home plate and scores.
 
 - **Runs Batted In (`RBI`)**  
-  Runs that score as a direct result of the batter's plate appearance (subject to official scoring rules).
+  Runs that score as a direct result of the batter's plate appearance (subject to league/scorekeeper rules).
 
-- **Walks / Base on Balls (`BB`)**  
-  Plate appearances ending in a four-ball walk (unintentional and intentional).
-
-- **Intentional Walks (`IBB`)**  
-  Subset of `BB` where walk is awarded intentionally.
+- **Walks (`BB`)**  
+  Plate appearances ending in a four-ball walk (including intentional walks if your league uses them; the app does not need a separate `IBB` stat).
 
 - **Hit by Pitch (`HBP`)**  
   Plate appearances where batter is awarded first base after being hit by a pitch.
 
 - **Strikeouts (`SO` or `K`)**  
-  Plate appearances ending in strike three.
-
-- **Stolen Bases (`SB`)**  
-  Successful advances to the next base while ball is not in play and without benefit of a hit or error.
-
-- **Caught Stealing (`CS`)**  
-  Attempts to steal where runner is put out.
-
-- **Sacrifice Flies (`SF`)**  
-  Fly-ball outs where a run scores and batter is credited with a sacrifice fly.
-
-- **Sacrifice Hits / Bunts (`SH`)**  
-  Bunts where batter is sacrificed to advance a runner.
+  Plate appearances ending in strike three (swinging, looking, or league-specific courtesy-strike rules).
 
 - **Total Bases (`TB`)**  
   Weighted total of bases from hits:  
   `TB = 1B + 2×2B + 3×3B + 4×HR`
 
+> **Deliberately not tracked for slowpitch:** Stolen bases (`SB`), caught stealing (`CS`), sacrifice bunts/flies as separate stats. Most men’s slowpitch leagues either disallow or rarely use these; they would add complexity for little benefit.
+
 ---
 
 ## 2. Core Rate Stats (Batters)
+
+These are the primary **performance metrics** for hitters in men’s slowpitch.
 
 - **Batting Average (`AVG` or `BA`)**  
   Measures hits per at-bat:  
@@ -79,8 +71,9 @@ All formulas are written in conceptual form, not implementation form (e.g., roun
 
 - **On-Base Percentage (`OBP`)**  
   Measures how often a batter reaches base safely:  
-  `OBP = (H + BB + HBP) / (AB + BB + HBP + SF)`  
-  *Defined only when denominator > 0.*
+  `OBP = (H + BB + HBP) / (AB + BB + HBP)`  
+  *Defined only when denominator > 0.*  
+  (Sacrifice flies are not broken out as a separate stat in this app.)
 
 - **Slugging Percentage (`SLG`)**  
   Measures power via bases per at-bat:  
@@ -88,154 +81,110 @@ All formulas are written in conceptual form, not implementation form (e.g., roun
   *Defined only when `AB > 0`.*
 
 - **On-base Plus Slugging (`OPS`)**  
-  Simple combination of on-base and slugging:  
+  Combination of on-base and power:  
   `OPS = OBP + SLG`
 
-- **Strikeout Rate (`K%` or `SO%`)**  
+- **Strikeout Rate (`K%`)**  
   Percentage of plate appearances ending in strikeout:  
-  `K% = SO / PA`
+  `K% = SO / PA`  
+  *Defined only when `PA > 0`.*
 
 - **Walk Rate (`BB%`)**  
-  Percentage of plate appearances ending in walk:  
-  `BB% = BB / PA`
+  Percentage of plate appearances ending in a walk:  
+  `BB% = BB / PA`  
+  *Defined only when `PA > 0`.*
 
-- **Stolen Base Percentage (`SB%`)**  
-  Success rate on steal attempts:  
-  `SB% = SB / (SB + CS)`  
-  *Defined only when `SB + CS > 0`.*
+These are the main per-player rate stats surfaced in the UI and reports.
 
 ---
 
-## 3. Core Counting Stats (Pitchers)
+## 3. Team-Level Game Stats
 
-- **Games Pitched (`G`)**  
-  Number of games in which the pitcher appears.
+Most teams care about **scoreboard-style stats** by game and season, not detailed pitcher lines. This app focuses on simple team-level metrics.
 
-- **Games Started (`GS`)**  
-  Subset of `G` where pitcher is the starting pitcher.
+- **Runs Scored (`RS`)**  
+  Total runs scored by the team in a game (or across games).
+
+- **Runs Allowed (`RA`)**  
+  Total runs the opponents score against this team in a game (or across games).
+
+- **Run Differential (`RD`)**  
+  Measures overall scoring margin:  
+  `RD = RS − RA`
+
+- **Games Won (`W`)**  
+  Games where this team finishes with more runs than the opponent.
+
+- **Games Lost (`L`)**  
+  Games where this team finishes with fewer runs than the opponent.
+
+- **Games Tied (`T`)** (optional, league-specific)  
+  Games ending with equal runs.
+
+- **Winning Percentage (`WIN%`)**  
+  `WIN% = (W + 0.5 × T) / (W + L + T)`  
+  If ties are not tracked, use `WIN% = W / (W + L)`.
+
+- **Runs Per Game (`R/G`)**  
+  Average runs scored per game:  
+  `R/G = RS / G_team`  
+  where `G_team` is number of games played by the team.
+
+- **Runs Allowed Per Game (`RA/G`)**  
+  `RA/G = RA / G_team`
+
+> Note: We do **not** track saves, blown saves, pitcher wins/losses, or pitcher WHIP/K/9-style stats; these are overkill for most slowpitch teams.
+
+---
+
+## 4. Optional Pitching and Defensive Stats (Simplified)
+
+Men’s slowpitch often uses a single primary pitcher and does not emphasize detailed pitching metrics. However, some leagues/teams may still want a basic view.
+
+The app may optionally support:
 
 - **Innings Pitched (`IP`)**  
-  Total outs recorded divided by 3.  
-  Stored either as:
-  - Decimal (e.g., 5.2 = 5 and 2/3 innings), or  
-  - Outs (`outs_pitched`) for precise calculation, then `IP = outs_pitched / 3`.
+  Total outs recorded by a pitcher divided by 3.  
+  Implementation can track `outs_pitched` and present `IP = outs_pitched / 3`.
 
-- **Batters Faced (`BF`)**  
-  Total plate appearances against the pitcher.
+- **Runs Allowed by Pitcher (`R_p`)**  
+  Runs scored while this pitcher is in the game.
 
-- **Hits Allowed (`H`)**  
-  Hits surrendered by the pitcher.
+- **Earned Runs by Pitcher (`ER_p`)**  
+  Subset of runs charged as earned to the pitcher (if the league or team wants to track errors vs earned runs).
 
-- **Runs Allowed (`R`)**  
-  Total runs scored by opponents while this pitcher is in the game.
+- **Earned Run Average (`ERA`)** *(optional)*  
+  `ERA = (ER_p × 7) / IP` or `(ER_p × 9) / IP` depending on official game length.  
+  The app should pick one convention and use it consistently (7 for typical slowpitch games is acceptable).
 
-- **Earned Runs (`ER`)**  
-  Subset of `R` that are charged as earned to the pitcher (no major assistance from errors or passed balls, per scoring rules).
-
-- **Home Runs Allowed (`HR`)**  
-  Home runs given up by the pitcher.
-
-- **Walks Allowed (`BB`)**  
-  Base on balls issued by the pitcher.
-
-- **Strikeouts (`SO` or `K`)**  
-  Outs recorded via strikeout by the pitcher.
-
-- **Hit Batters (`HBP`)**  
-  Batters awarded first base after being hit by a pitch from this pitcher.
-
-- **Wild Pitches (`WP`)**  
-  Pitches that are too high/low/wide for the catcher to handle with ordinary effort, allowing runners to advance (scorer judgment).
-
-- **Balks (`BK`)**  
-  Illegal motions by the pitcher with runners on base, advancing runners.
-
-- **Saves (`SV`)**  
-  Credited when a relief pitcher finishes a game under specific conditions while maintaining the lead.
-
-- **Blown Saves (`BS`)**  
-  Relief opportunities where the pitcher loses a lead in a save situation.
-
-- **Wins (`W`)**  
-  Games in which pitcher is the pitcher of record when team takes a lead it never relinquishes.
-
-- **Losses (`L`)**  
-  Games in which pitcher is the pitcher of record when opponents take a lead they never relinquish.
-
----
-
-## 4. Core Rate Stats (Pitchers)
-
-- **Earned Run Average (`ERA`)**  
-  Earned runs allowed per 9 innings pitched:  
-  `ERA = (ER × 9) / IP`  
-  - Use `IP` in innings; ideally calculate from outs to avoid rounding errors.  
-  - Only defined when `IP > 0`.
-
-- **Walks plus Hits per Inning Pitched (`WHIP`)**  
-  Base runners allowed per inning (walks + hits):  
-  `WHIP = (BB + H) / IP`  
-  *Defined only when `IP > 0`.*
-
-- **Strikeouts per 9 Innings (`K/9`)**  
-  `K/9 = (SO × 9) / IP`
-
-- **Walks per 9 Innings (`BB/9`)**  
-  `BB/9 = (BB × 9) / IP`
-
-- **Home Runs per 9 Innings (`HR/9`)**  
-  `HR/9 = (HR × 9) / IP`
-
-- **Strikeout-to-Walk Ratio (`K/BB`)**  
-  `K/BB = SO / BB`  
-  *Defined only when `BB > 0`.*
-
----
-
-## 5. Fielding / Defensive Basics
-
-(Include only the most standard counting stats; advanced fielding metrics are omitted.)
-
-- **Putouts (`PO`)**  
-  Outs recorded by a fielder catching a ball or tagging a runner.
-
-- **Assists (`A`)**  
-  Fielders who touch the ball prior to a putout.
+Defensive team stats can be kept simple:
 
 - **Errors (`E`)**  
-  Misplays that prolong an at-bat or allow runners to advance when an average fielder would have recorded an out.
+  Misplays that extend an at-bat or allow runners to advance when an average fielder would have recorded an out.
 
-- **Chances / Total Chances (`TC`)**  
-  Opportunities to make a play:  
-  `TC = PO + A + E`
-
-- **Fielding Percentage (`FPCT` or `FLD%`)**  
-  Basic measure of error avoidance:  
-  `FPCT = (PO + A) / (PO + A + E)`  
-  *Defined only when `PO + A + E > 0`.*
+If we track `E` at the team level, it can be displayed with the scoreboard totals (`R`, `H`, `E`). Individual fielder stats (putouts, assists) are **not required** for this app.
 
 ---
 
-## 6. Implementation Notes & Assumptions
+## 5. Implementation Notes & Assumptions
 
 - **Rounding & Display**  
   - Typical displays:  
-    - `BA`, `OBP`, `SLG`, `OPS`, `WHIP` → 3 decimal places (e.g., .275, .345, 1.105, 1.23).  
-    - `ERA`, `K/9`, `BB/9`, `HR/9` → 2 decimal places.
-  - Underlying calculations should retain more precision and round only for display.
+    - `BA`, `OBP`, `SLG`, `OPS` → 3 decimal places (e.g., .650, .720, 1.350).  
+    - `ERA`, `R/G`, `RA/G` → 2 decimal places.  
+  - Internally, retain more precision and round only for display.
 
 - **Division-by-zero Handling**  
-  - If any denominator is `0`, result should be `null`/`undefined` (or a sentinel) rather than `0`, unless we explicitly decide otherwise in implementation.
+  - If any denominator is `0`, the stat should be represented as `null`/`undefined` (or a sentinel) rather than `0`, unless we explicitly define a different convention.
 
 - **Data Model Expectations**  
-  - Batting stats will likely be computed per:  
-    - Single game, series, season, and career.  
-  - Pitching stats will follow the same levels.  
-  - `outs_pitched` is recommended internally; convert to `IP` only for display and user-facing formulas.
+  - Batting stats will typically be computed per:  
+    - Single game, season, and career for each player.  
+  - Team stats will be computed both per game and aggregated by season.
 
-- **Scope Deliberately Excluded (for now)**  
-  - Advanced sabermetric stats: WAR, WAA, wOBA, wRC+, OPS+, FIP, xFIP, etc.  
-  - Park/era-adjusted stats.  
-  - Batted-ball profile metrics (GB%, FB%, LD%).
+- **Deliberately Excluded for Slowpitch**  
+  - Stolen base metrics (`SB`, `CS`, `SB%`).  
+  - Detailed pitcher stats such as `WHIP`, `K/9`, `BB/9`, `HR/9`, `K/BB`.  
+  - Saves, blown saves, and individual pitcher wins/losses.  
+  - Advanced sabermetric stats of any kind.
 
-This document should be treated as the **source of truth for variable names and formulas** for basic baseball calculations in this project.
