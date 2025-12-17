@@ -1,16 +1,25 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppBar from '../components/AppBar.vue'
 import { useGameStore } from '../stores/gameStore'
 
 const router = useRouter()
-const { teams, createGame, startGame } = useGameStore()
+const { teams, createGame, startGame, fetchTeams } = useGameStore()
+
+onMounted(async () => {
+  await fetchTeams()
+  // Set default team after fetching
+  if (teams.value.length > 0 && !selectedTeamId.value) {
+    selectedTeamId.value = teams.value[0].id
+    initializeLineup()
+  }
+})
 
 // Form state
 const gameDate = ref(new Date().toISOString().split('T')[0])
 const gameTime = ref('7:00 PM')
-const selectedTeamId = ref(teams.value[0]?.id || '')
+const selectedTeamId = ref('')
 const opponentName = ref('')
 const fieldName = ref('')
 
@@ -77,17 +86,19 @@ function openAddPlayer(team) {
   showAddPlayer.value = true
 }
 
-function handleStartGame() {
-  const game = createGame({
+async function handleStartGame() {
+  const game = await createGame({
     date: gameDate.value,
     time: gameTime.value,
-    myTeam: { name: selectedTeam.value?.name || 'My Team', score: 0 },
-    opponent: { name: opponentName.value, score: 0 },
+    myTeamId: selectedTeamId.value,
+    opponentName: opponentName.value,
     field: fieldName.value
   })
   
-  startGame(game.id, myTeamLineup.value, opponentLineup.value)
-  router.push(`/game/${game.id}/score`)
+  if (game) {
+    await startGame(game.id, myTeamLineup.value, opponentLineup.value)
+    router.push(`/game/${game.id}/score`)
+  }
 }
 </script>
 

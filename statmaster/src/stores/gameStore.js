@@ -1,40 +1,13 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
+import { supabase } from '../lib/supabase'
 
-// Mock data store - will be replaced with backend API calls
+// Reactive state
 const state = reactive({
-  games: [
-    {
-      id: '1',
-      date: new Date().toISOString().split('T')[0],
-      time: '7:00 PM',
-      myTeam: { name: 'Thunder', score: 0 },
-      opponent: { name: 'Lightning', score: 0 },
-      field: 'Field 1',
-      status: 'upcoming', // upcoming, in_progress, final
-      inning: 1,
-      isTop: true,
-      outs: 0
-    }
-  ],
+  games: [],
   activeGameId: null,
-  teams: [
-    {
-      id: '1',
-      name: 'Thunder',
-      players: [
-        { id: '1', number: '13', firstName: 'Bill', lastName: 'Smith', position: 'SS' },
-        { id: '2', number: '7', firstName: 'Mike', lastName: 'Johnson', position: 'CF' },
-        { id: '3', number: '22', firstName: 'Dave', lastName: 'Williams', position: '1B' },
-        { id: '4', number: '5', firstName: 'Tom', lastName: 'Brown', position: 'C' },
-        { id: '5', number: '11', firstName: 'Chris', lastName: 'Davis', position: '3B' },
-        { id: '6', number: '33', firstName: 'John', lastName: 'Miller', position: 'LF' },
-        { id: '7', number: '8', firstName: 'Steve', lastName: 'Wilson', position: 'RF' },
-        { id: '8', number: '15', firstName: 'Dan', lastName: 'Moore', position: '2B' },
-        { id: '9', number: '21', firstName: 'Rob', lastName: 'Taylor', position: 'P' },
-        { id: '10', number: '44', firstName: 'Jim', lastName: 'Anderson', position: 'EH' }
-      ]
-    }
-  ]
+  teams: [],
+  loading: false,
+  error: null
 })
 
 // Current game state for live scoring
@@ -56,16 +29,184 @@ const currentGame = reactive({
 export function useGameStore() {
   const games = computed(() => state.games)
   const teams = computed(() => state.teams)
+  const loading = computed(() => state.loading)
+  const error = computed(() => state.error)
   
   const activeGame = computed(() => 
     state.games.find(g => g.id === state.activeGameId)
   )
 
-  function createGame(gameData) {
+  // Fetch all teams from Supabase
+  async function fetchTeams() {
+    state.loading = true
+    const { data, error } = await supabase
+      .from('teams')
+      .select(`
+        *,
+        players (*)
+      `)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      state.error = error.message
+      console.error('Error fetching teams:', error)
+    } else {
+      // Transform to match existing format
+      state.teams = data.map(team => ({
+        id: team.id,
+        name: team.name,
+        players: (team.players || []).map(p => ({
+          id: p.id,
+          number: p.number || '',
+          firstName: p.name?.split(' ')[0] || '',
+          lastName: p.name?.split(' ').slice(1).join(' ') || '',
+          position: p.position || ''
+        })).sort((a, b) => (a.batting_order || 0) - (b.batting_order || 0))
+      }))
+    }
+    state.loading = false
+  }
+
+  // Fetch all games from Supabase
+  async function fetchGames() {
+    state.loading = true
+    const { data, error } = await supabase
+      .from('games')
+      .select('*')
+      .order('date', { ascending: false })
+    
+    if (error) {
+      state.error = error.message
+      console.error('Error fetching games:', error)
+    } else {
+      // Transform to match existing format
+      state.games = data.map(game => ({
+        id: game.id,
+        date: game.date,
+        time: game.time || '',
+        myTeam: { name: state.teams.find(t => t.id === game.my_team_id)?.name || 'My Team', score: game.my_score },
+        myTeamId: game.my_team_id,
+        opponent: { name: game.opponent_name, score: game.opponent_score },
+        field: game.field || '',
+        status: game.status,
+        inning: game.current_inning,
+        isTop: game.is_top_inning,
+        outs: game.outs,
+        balls: game.balls,
+        strikes: game.strikes,
+        bases: game.bases || { first: null, second: null, third: null }
+      }))
+    }
+    state.loading = false
+  }
+
+  // Create a new team
+  async function createTeam(name) {
+    const { data, error } = await supabase
+      .from('teams')
+      .insert({ name })
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error creating team:', error)
+      return null
+    }
+    
+    const newTeam = { id: data.id, name: data.name, players: [] }
+    state.teams.unshift(newTeam)
+    return newTeam
+  }
+
+  // Add player to team
+  async function addPlayer(teamId, playerData) {
+    const fullName = `${playerData.firstName} ${playerData.lastName}`.trim()
+    const { data, error } = await supabase
+      .from('players')
+      .insert({
+        team_id: teamId,
+        name: fullName,
+        number: playerData.number,
+        position: playerData.position,
+        batting_order: playerData.battingOrder || 0
+      })
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error adding player:', error)
+      return null
+    }
+    
+    const team = state.teams.find(t => t.id === teamId)
+    if (team) {
+      team.players.push({
+        id: data.id,
+        number: data.number || '',
+        firstName: playerData.firstName,
+        lastName: playerData.lastName,
+        position: data.position || ''
+      })
+    }
+    return data
+  }
+
+  // Remove player from team
+  async function removePlayer(teamId, playerId) {
+    const { error } = await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId)
+    
+    if (error) {
+      console.error('Error removing player:', error)
+      return false
+    }
+    
+    const team = state.teams.find(t => t.id === teamId)
+    if (team) {
+      team.players = team.players.filter(p => p.id !== playerId)
+    }
+    return true
+  }
+
+  // Create a new game
+  async function createGame(gameData) {
+    const { data, error } = await supabase
+      .from('games')
+      .insert({
+        my_team_id: gameData.myTeamId,
+        opponent_name: gameData.opponent?.name || gameData.opponentName,
+        date: gameData.date,
+        time: gameData.time,
+        field: gameData.field,
+        status: 'scheduled',
+        my_score: 0,
+        opponent_score: 0,
+        current_inning: 1,
+        is_top_inning: true,
+        outs: 0,
+        balls: 1,
+        strikes: 1,
+        bases: { first: null, second: null, third: null }
+      })
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error creating game:', error)
+      return null
+    }
+    
     const newGame = {
-      id: Date.now().toString(),
-      ...gameData,
-      status: 'upcoming',
+      id: data.id,
+      date: data.date,
+      time: data.time || '',
+      myTeam: { name: state.teams.find(t => t.id === data.my_team_id)?.name || 'My Team', score: 0 },
+      myTeamId: data.my_team_id,
+      opponent: { name: data.opponent_name, score: 0 },
+      field: data.field || '',
+      status: data.status,
       inning: 1,
       isTop: true,
       outs: 0
@@ -74,46 +215,79 @@ export function useGameStore() {
     return newGame
   }
 
-  function startGame(gameId, myTeamLineup, opponentLineup) {
+  // Start a game (transition to in_progress)
+  async function startGame(gameId, myTeamLineup, opponentLineup) {
     const game = state.games.find(g => g.id === gameId)
-    if (game) {
-      game.status = 'in_progress'
-      state.activeGameId = gameId
-      
-      // Initialize current game state
-      currentGame.id = gameId
-      currentGame.myTeam = { ...game.myTeam, lineup: myTeamLineup }
-      currentGame.opponent = { ...game.opponent, lineup: opponentLineup }
-      currentGame.inning = 1
-      currentGame.isTop = true
-      currentGame.outs = 0
-      currentGame.balls = 1
-      currentGame.strikes = 1
-      currentGame.bases = { first: null, second: null, third: null }
-      currentGame.currentBatterIndex = 0
-      currentGame.plays = []
-      currentGame.inningScores = { away: [0], home: [0] }
+    if (!game) return null
+    
+    // Update game status in Supabase
+    const { error } = await supabase
+      .from('games')
+      .update({ status: 'in_progress' })
+      .eq('id', gameId)
+    
+    if (error) {
+      console.error('Error starting game:', error)
+      return null
     }
+    
+    game.status = 'in_progress'
+    state.activeGameId = gameId
+    
+    // Initialize current game state
+    currentGame.id = gameId
+    currentGame.myTeam = { ...game.myTeam, lineup: myTeamLineup }
+    currentGame.opponent = { ...game.opponent, lineup: opponentLineup }
+    currentGame.inning = 1
+    currentGame.isTop = true
+    currentGame.outs = 0
+    currentGame.balls = 1
+    currentGame.strikes = 1
+    currentGame.bases = { first: null, second: null, third: null }
+    currentGame.currentBatterIndex = 0
+    currentGame.plays = []
+    currentGame.inningScores = { away: [0], home: [0] }
+    
     return game
   }
 
-  function recordPlay(playType, details = {}) {
+  async function recordPlay(playType, details = {}) {
+    const batter = getCurrentBatter()
     const play = {
       id: Date.now().toString(),
       type: playType,
       inning: currentGame.inning,
       isTop: currentGame.isTop,
-      batter: getCurrentBatter(),
+      batter,
       timestamp: new Date().toISOString(),
       ...details
     }
     
+    // Save play to Supabase
+    const { error } = await supabase
+      .from('plays')
+      .insert({
+        game_id: currentGame.id,
+        inning: play.inning,
+        is_top: play.isTop,
+        batter_id: batter?.id || null,
+        play_type: playType,
+        runs_scored: details.runsScored || 0,
+        outs_recorded: details.outsRecorded || 0,
+        bases_before: { ...currentGame.bases },
+        bases_after: details.newBases || currentGame.bases
+      })
+    
+    if (error) {
+      console.error('Error recording play:', error)
+    }
+    
     currentGame.plays.push(play)
-    processPlay(play)
+    await processPlay(play)
     return play
   }
 
-  function processPlay(play) {
+  async function processPlay(play) {
     const runsScored = play.runsScored || 0
     
     // Update score
@@ -131,7 +305,7 @@ export function useGameStore() {
     if (play.outsRecorded) {
       currentGame.outs += play.outsRecorded
       if (currentGame.outs >= 3) {
-        endHalfInning()
+        await endHalfInning()
         return
       }
     }
@@ -144,6 +318,9 @@ export function useGameStore() {
     // Reset count for new batter
     currentGame.balls = 1
     currentGame.strikes = 1
+    
+    // Sync game state to Supabase
+    await syncGameState()
   }
 
   function advanceBatter() {
@@ -151,7 +328,7 @@ export function useGameStore() {
     currentGame.currentBatterIndex = (currentGame.currentBatterIndex + 1) % lineup.length
   }
 
-  function endHalfInning() {
+  async function endHalfInning() {
     currentGame.outs = 0
     currentGame.bases = { first: null, second: null, third: null }
     currentGame.balls = 1
@@ -181,6 +358,32 @@ export function useGameStore() {
     
     // Reset batter index for the team now batting
     currentGame.currentBatterIndex = 0
+    
+    // Sync to Supabase
+    await syncGameState()
+  }
+
+  // Sync current game state to Supabase
+  async function syncGameState() {
+    if (!currentGame.id) return
+    
+    const { error } = await supabase
+      .from('games')
+      .update({
+        my_score: currentGame.myTeam.score,
+        opponent_score: currentGame.opponent.score,
+        current_inning: currentGame.inning,
+        is_top_inning: currentGame.isTop,
+        outs: currentGame.outs,
+        balls: currentGame.balls,
+        strikes: currentGame.strikes,
+        bases: currentGame.bases
+      })
+      .eq('id', currentGame.id)
+    
+    if (error) {
+      console.error('Error syncing game state:', error)
+    }
   }
 
   function getCurrentBatter() {
@@ -200,12 +403,22 @@ export function useGameStore() {
     currentGame.bases = { ...newBases }
   }
 
-  function endGame() {
+  async function endGame() {
     const game = state.games.find(g => g.id === currentGame.id)
     if (game) {
       game.status = 'final'
       game.myTeam.score = currentGame.myTeam.score
       game.opponent.score = currentGame.opponent.score
+      
+      // Update in Supabase
+      await supabase
+        .from('games')
+        .update({
+          status: 'final',
+          my_score: currentGame.myTeam.score,
+          opponent_score: currentGame.opponent.score
+        })
+        .eq('id', currentGame.id)
     }
     state.activeGameId = null
   }
@@ -213,8 +426,15 @@ export function useGameStore() {
   return {
     games,
     teams,
+    loading,
+    error,
     activeGame,
     currentGame,
+    fetchTeams,
+    fetchGames,
+    createTeam,
+    addPlayer,
+    removePlayer,
     createGame,
     startGame,
     recordPlay,

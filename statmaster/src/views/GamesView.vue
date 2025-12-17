@@ -1,11 +1,16 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppBar from '../components/AppBar.vue'
 import { useGameStore } from '../stores/gameStore'
 
 const router = useRouter()
-const { games } = useGameStore()
+const { games, loading, fetchTeams, fetchGames } = useGameStore()
+
+onMounted(async () => {
+  await fetchTeams()
+  await fetchGames()
+})
 
 const todayGames = computed(() => {
   const today = new Date().toISOString().split('T')[0]

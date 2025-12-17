@@ -1,15 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppBar from '../components/AppBar.vue'
 import { useGameStore } from '../stores/gameStore'
 
-const { teams } = useGameStore()
+const { teams, fetchTeams, createTeam, addPlayer: addPlayerToTeam, removePlayer: removePlayerFromTeam } = useGameStore()
 
 const selectedTeam = ref(null)
 const showAddTeam = ref(false)
 const showAddPlayer = ref(false)
 const newTeamName = ref('')
 const newPlayer = ref({ number: '', firstName: '', lastName: '', position: '' })
+
+onMounted(async () => {
+  await fetchTeams()
+})
 
 function selectTeam(team) {
   selectedTeam.value = team
@@ -19,32 +23,28 @@ function goBack() {
   selectedTeam.value = null
 }
 
-function addTeam() {
+async function addTeam() {
   if (newTeamName.value.trim()) {
-    teams.value.push({
-      id: Date.now().toString(),
-      name: newTeamName.value.trim(),
-      players: []
-    })
-    newTeamName.value = ''
-    showAddTeam.value = false
+    const team = await createTeam(newTeamName.value.trim())
+    if (team) {
+      newTeamName.value = ''
+      showAddTeam.value = false
+    }
   }
 }
 
-function addPlayer() {
+async function addPlayer() {
   if (selectedTeam.value && newPlayer.value.firstName) {
-    selectedTeam.value.players.push({
-      id: Date.now().toString(),
-      ...newPlayer.value
-    })
+    await addPlayerToTeam(selectedTeam.value.id, newPlayer.value)
     newPlayer.value = { number: '', firstName: '', lastName: '', position: '' }
     showAddPlayer.value = false
   }
 }
 
-function removePlayer(index) {
+async function removePlayer(index) {
   if (selectedTeam.value) {
-    selectedTeam.value.players.splice(index, 1)
+    const player = selectedTeam.value.players[index]
+    await removePlayerFromTeam(selectedTeam.value.id, player.id)
   }
 }
 </script>
