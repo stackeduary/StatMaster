@@ -4,7 +4,7 @@ This document complements `ui.md` and captures **non-UI** requirements (function
 
 ## 1. Tech Stack (Planned)
 
-- **Frontend:** Vue.js + Tailwind CSS.
+- **Frontend:** Vue.js + Tailwind CSS; use Yarn rather than npm
 - **Backend:** FastAPI.
 - **Database:** PostgreSQL.
 - **In-memory store / cache:** KeyDB.

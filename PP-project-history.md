@@ -4,6 +4,8 @@
 
 ### Checkpoint 2: Theme System Implementation
 
+**Implemented by:** Claude 4.5 Opus
+
 **What was added:**
 - Global light/dark mode toggle on every screen
 - Theme persists in localStorage
@@ -31,6 +33,8 @@
 ## 2024-12-17 - Initial UI Implementation
 
 ### Checkpoint 1: Vue.js + Tailwind CSS Frontend Created
+
+**Implemented by:** Claude 4.5 Opus
 
 **What was built:**
 - Complete Vue.js 3 frontend with Vite build system
@@ -76,7 +80,7 @@
 **To run:**
 ```bash
 cd statmaster
-npm run dev
+yarn dev
 ```
 
 **Next steps:**
