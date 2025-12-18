@@ -13,8 +13,8 @@ const state = reactive({
 // Current game state for live scoring
 const currentGame = reactive({
   id: null,
-  myTeam: { name: '', score: 0, lineup: [] },
-  opponent: { name: '', score: 0, lineup: [] },
+  myTeam: { name: '', score: 0, lineup: [], pitcher: null },
+  opponent: { name: '', score: 0, lineup: [], pitcher: null },
   inning: 1,
   isTop: true,
   outs: 0,
@@ -23,7 +23,8 @@ const currentGame = reactive({
   bases: { first: null, second: null, third: null },
   currentBatterIndex: 0,
   plays: [],
-  inningScores: { away: [], home: [] }
+  inningScores: { away: [], home: [] },
+  pitchingStats: { myTeam: null, opponent: null }
 })
 
 export function useGameStore() {
@@ -188,7 +189,9 @@ export function useGameStore() {
         outs: 0,
         balls: 1,
         strikes: 1,
-        bases: { first: null, second: null, third: null }
+        bases: { first: null, second: null, third: null },
+        my_pitcher_id: gameData.myPitcherId || null,
+        opponent_pitcher_name: gameData.opponentPitcherName || null
       })
       .select()
       .single()
@@ -216,7 +219,7 @@ export function useGameStore() {
   }
 
   // Start a game (transition to in_progress)
-  async function startGame(gameId, myTeamLineup, opponentLineup) {
+  async function startGame(gameId, myTeamLineup, opponentLineup, pitchers = {}) {
     const game = state.games.find(g => g.id === gameId)
     if (!game) return null
     
@@ -236,8 +239,8 @@ export function useGameStore() {
     
     // Initialize current game state
     currentGame.id = gameId
-    currentGame.myTeam = { ...game.myTeam, lineup: myTeamLineup }
-    currentGame.opponent = { ...game.opponent, lineup: opponentLineup }
+    currentGame.myTeam = { ...game.myTeam, lineup: myTeamLineup, pitcher: pitchers.myPitcher || null }
+    currentGame.opponent = { ...game.opponent, lineup: opponentLineup, pitcher: pitchers.opponentPitcher || null }
     currentGame.inning = 1
     currentGame.isTop = true
     currentGame.outs = 0
@@ -247,6 +250,48 @@ export function useGameStore() {
     currentGame.currentBatterIndex = 0
     currentGame.plays = []
     currentGame.inningScores = { away: [0], home: [0] }
+    
+    // Initialize pitching stats
+    currentGame.pitchingStats = {
+      myTeam: {
+        pitcher: pitchers.myPitcher,
+        inningsPitched: 0,
+        hitsAllowed: 0,
+        runsAllowed: 0,
+        earnedRuns: 0,
+        walks: 0,
+        strikeouts: 0,
+        homeRunsAllowed: 0,
+        battersFaced: 0
+      },
+      opponent: {
+        pitcher: pitchers.opponentPitcher,
+        inningsPitched: 0,
+        hitsAllowed: 0,
+        runsAllowed: 0,
+        earnedRuns: 0,
+        walks: 0,
+        strikeouts: 0,
+        homeRunsAllowed: 0,
+        battersFaced: 0
+      }
+    }
+    
+    // Create pitching stats records in Supabase
+    if (pitchers.myPitcher) {
+      await supabase.from('pitching_stats').insert({
+        game_id: gameId,
+        pitcher_id: pitchers.myPitcher.id,
+        is_my_team: true
+      })
+    }
+    if (pitchers.opponentPitcher) {
+      await supabase.from('pitching_stats').insert({
+        game_id: gameId,
+        pitcher_name: `${pitchers.opponentPitcher.firstName} ${pitchers.opponentPitcher.lastName}`.trim(),
+        is_my_team: false
+      })
+    }
     
     return game
   }
@@ -300,6 +345,9 @@ export function useGameStore() {
       currentGame.inningScores.home[currentGame.inning - 1] = 
         (currentGame.inningScores.home[currentGame.inning - 1] || 0) + runsScored
     }
+    
+    // Update pitching stats
+    updatePitchingStats(play)
 
     // Handle outs
     if (play.outsRecorded) {
@@ -322,6 +370,48 @@ export function useGameStore() {
     // Sync game state to Supabase
     await syncGameState()
   }
+  
+  // Update pitching stats based on play type
+  function updatePitchingStats(play) {
+    // Determine which pitcher's stats to update
+    // If top of inning (opponent batting), update MY pitcher's stats
+    // If bottom of inning (my team batting), update OPPONENT pitcher's stats
+    const stats = currentGame.isTop 
+      ? currentGame.pitchingStats.myTeam 
+      : currentGame.pitchingStats.opponent
+    
+    if (!stats) return
+    
+    // Increment batters faced for most plays (not balls/strikes)
+    if (!['ball', 'strike'].includes(play.type)) {
+      stats.battersFaced++
+    }
+    
+    // Update based on play type
+    switch (play.type) {
+      case 'single':
+      case 'double':
+      case 'triple':
+        stats.hitsAllowed++
+        break
+      case 'homerun':
+        stats.hitsAllowed++
+        stats.homeRunsAllowed++
+        break
+      case 'strikeout':
+        stats.strikeouts++
+        break
+      case 'walk':
+        stats.walks++
+        break
+    }
+    
+    // Track runs allowed
+    if (play.runsScored) {
+      stats.runsAllowed += play.runsScored
+      stats.earnedRuns += play.runsScored // Simplified - all runs are earned for now
+    }
+  }
 
   function advanceBatter() {
     const lineup = currentGame.isTop ? currentGame.opponent.lineup : currentGame.myTeam.lineup
@@ -329,6 +419,14 @@ export function useGameStore() {
   }
 
   async function endHalfInning() {
+    // Update innings pitched for the pitcher who just finished
+    const stats = currentGame.isTop 
+      ? currentGame.pitchingStats.myTeam 
+      : currentGame.pitchingStats.opponent
+    if (stats) {
+      stats.inningsPitched += 1
+    }
+    
     currentGame.outs = 0
     currentGame.bases = { first: null, second: null, third: null }
     currentGame.balls = 1
@@ -361,6 +459,49 @@ export function useGameStore() {
     
     // Sync to Supabase
     await syncGameState()
+    await syncPitchingStats()
+  }
+  
+  // Sync pitching stats to Supabase
+  async function syncPitchingStats() {
+    if (!currentGame.id) return
+    
+    const myStats = currentGame.pitchingStats.myTeam
+    const oppStats = currentGame.pitchingStats.opponent
+    
+    if (myStats?.pitcher) {
+      await supabase
+        .from('pitching_stats')
+        .update({
+          innings_pitched: myStats.inningsPitched,
+          hits_allowed: myStats.hitsAllowed,
+          runs_allowed: myStats.runsAllowed,
+          earned_runs: myStats.earnedRuns,
+          walks: myStats.walks,
+          strikeouts: myStats.strikeouts,
+          home_runs_allowed: myStats.homeRunsAllowed,
+          batters_faced: myStats.battersFaced
+        })
+        .eq('game_id', currentGame.id)
+        .eq('is_my_team', true)
+    }
+    
+    if (oppStats?.pitcher) {
+      await supabase
+        .from('pitching_stats')
+        .update({
+          innings_pitched: oppStats.inningsPitched,
+          hits_allowed: oppStats.hitsAllowed,
+          runs_allowed: oppStats.runsAllowed,
+          earned_runs: oppStats.earnedRuns,
+          walks: oppStats.walks,
+          strikeouts: oppStats.strikeouts,
+          home_runs_allowed: oppStats.homeRunsAllowed,
+          batters_faced: oppStats.battersFaced
+        })
+        .eq('game_id', currentGame.id)
+        .eq('is_my_team', false)
+    }
   }
 
   // Sync current game state to Supabase
@@ -419,6 +560,9 @@ export function useGameStore() {
           opponent_score: currentGame.opponent.score
         })
         .eq('id', currentGame.id)
+      
+      // Final sync of pitching stats
+      await syncPitchingStats()
     }
     state.activeGameId = null
   }

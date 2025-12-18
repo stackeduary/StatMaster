@@ -10,6 +10,7 @@ const { currentGame, getCurrentBatter, recordPlay, undoLastPlay, updateBases, en
 
 const showMenu = ref(false)
 const showRunnerModal = ref(false)
+const showPitchingStats = ref(false)
 const pendingPlay = ref(null)
 
 // Computed values
@@ -102,17 +103,39 @@ function getDefaultPlayResult(type) {
 function advanceRunners(bases, excludeBatter = false) {
   const newBases = { first: null, second: null, third: null }
   
-  // Simple advancement logic
-  if (bases >= 1 && !excludeBatter) {
-    newBases.first = currentBatter.value
+  // Place batter on the appropriate base
+  if (!excludeBatter) {
+    if (bases === 1) {
+      newBases.first = currentBatter.value
+    } else if (bases === 2) {
+      newBases.second = currentBatter.value
+    } else if (bases === 3) {
+      newBases.third = currentBatter.value
+    }
   }
-  if (bases >= 2 && currentGame.bases.first) {
-    newBases.third = currentGame.bases.first
-  } else if (bases === 1 && currentGame.bases.first) {
-    newBases.second = currentGame.bases.first
-  }
-  if (currentGame.bases.second && bases < 2) {
-    newBases.third = currentGame.bases.second
+  
+  // Advance existing runners
+  // Single: runners advance 1 base (runner on 2nd goes to 3rd, runner on 1st goes to 2nd)
+  // Double: runners advance 2 bases (all runners score except runner on 1st goes to 3rd)
+  // Triple: all runners score
+  
+  if (bases === 1) {
+    // Single - advance runners 1 base
+    if (currentGame.bases.second) {
+      newBases.third = currentGame.bases.second
+    }
+    if (currentGame.bases.first) {
+      newBases.second = currentGame.bases.first
+    }
+  } else if (bases === 2) {
+    // Double - runner on 1st goes to 3rd, others score
+    if (currentGame.bases.first) {
+      newBases.third = currentGame.bases.first
+    }
+    // Runner on 2nd and 3rd score
+  } else if (bases === 3) {
+    // Triple - all runners score, batter on 3rd
+    // All existing runners score, no one left on base except batter
   }
   
   return newBases
@@ -240,8 +263,14 @@ function getPlayDescription(play) {
         <!-- Dropdown menu -->
         <div 
           v-if="showMenu"
-          class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 min-w-40 z-50 border border-gray-200 dark:border-gray-600"
+          class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 min-w-48 z-50 border border-gray-200 dark:border-gray-600"
         >
+          <button 
+            @click="showPitchingStats = true; showMenu = false"
+            class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
+          >
+            View Pitching Stats
+          </button>
           <button 
             @click="handleEndInning"
             class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
@@ -263,11 +292,17 @@ function getPlayDescription(play) {
       <div class="text-center">
         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ currentGame.opponent.name || 'Away' }}</p>
         <p class="text-2xl font-bold">{{ currentGame.opponent.score }}</p>
+        <p v-if="currentGame.opponent.pitcher" class="text-xs text-gray-400 dark:text-gray-500">
+          P: {{ currentGame.opponent.pitcher.firstName }} {{ currentGame.opponent.pitcher.lastName?.charAt(0) || '' }}
+        </p>
       </div>
       <div class="text-gray-400 dark:text-gray-500">-</div>
       <div class="text-center">
         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ currentGame.myTeam.name || 'Home' }}</p>
         <p class="text-2xl font-bold">{{ currentGame.myTeam.score }}</p>
+        <p v-if="currentGame.myTeam.pitcher" class="text-xs text-gray-400 dark:text-gray-500">
+          P: {{ currentGame.myTeam.pitcher.firstName }} {{ currentGame.myTeam.pitcher.lastName?.charAt(0) || '' }}
+        </p>
       </div>
     </div>
     
@@ -462,6 +497,125 @@ function getPlayDescription(play) {
           >
             2 runs scored
           </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pitching Stats Modal -->
+    <div 
+      v-if="showPitchingStats"
+      class="fixed inset-0 bg-black/70 z-50 flex items-end justify-center"
+      @click.self="showPitchingStats = false"
+    >
+      <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pitching Stats</h3>
+          <button @click="showPitchingStats = false" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- My Team Pitcher Stats -->
+        <div v-if="currentGame.pitchingStats.myTeam?.pitcher" class="mb-6">
+          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+            {{ currentGame.myTeam.name }} Pitcher
+          </h4>
+          <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
+            <p class="font-medium text-gray-900 dark:text-white mb-3">
+              #{{ currentGame.pitchingStats.myTeam.pitcher.number }} 
+              {{ currentGame.pitchingStats.myTeam.pitcher.firstName }} 
+              {{ currentGame.pitchingStats.myTeam.pitcher.lastName }}
+            </p>
+            <div class="grid grid-cols-4 gap-3 text-center">
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.inningsPitched }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IP</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.hitsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">H</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.runsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">R</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.earnedRuns }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">ER</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.walks }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">BB</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.strikeouts }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">K</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.homeRunsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">HR</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.battersFaced }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">BF</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Opponent Pitcher Stats -->
+        <div v-if="currentGame.pitchingStats.opponent?.pitcher">
+          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+            {{ currentGame.opponent.name }} Pitcher
+          </h4>
+          <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
+            <p class="font-medium text-gray-900 dark:text-white mb-3">
+              {{ currentGame.pitchingStats.opponent.pitcher.firstName }} 
+              {{ currentGame.pitchingStats.opponent.pitcher.lastName }}
+            </p>
+            <div class="grid grid-cols-4 gap-3 text-center">
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.inningsPitched }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">IP</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.hitsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">H</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.runsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">R</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.earnedRuns }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">ER</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.walks }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">BB</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.strikeouts }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">K</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.homeRunsAllowed }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">HR</p>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.battersFaced }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">BF</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- No pitchers message -->
+        <div v-if="!currentGame.pitchingStats.myTeam?.pitcher && !currentGame.pitchingStats.opponent?.pitcher" 
+             class="text-center py-8 text-gray-500 dark:text-gray-400">
+          No pitchers selected for this game
         </div>
       </div>
     </div>

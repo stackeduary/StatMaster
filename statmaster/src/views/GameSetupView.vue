@@ -29,6 +29,10 @@ const opponentLineup = ref([])
 const showMyTeamLineup = ref(true)
 const showOpponentLineup = ref(false)
 
+// Pitcher state
+const myPitcherId = ref('')
+const opponentPitcher = ref({ firstName: '', lastName: '' })
+
 // Player form
 const showAddPlayer = ref(false)
 const addingToTeam = ref('my') // 'my' or 'opponent'
@@ -36,6 +40,10 @@ const newPlayer = ref({ number: '', firstName: '', lastName: '', position: '' })
 
 const selectedTeam = computed(() => 
   teams.value.find(t => t.id === selectedTeamId.value)
+)
+
+const myPitcher = computed(() => 
+  myTeamLineup.value.find(p => p.id === myPitcherId.value)
 )
 
 const canStartGame = computed(() => 
@@ -92,11 +100,18 @@ async function handleStartGame() {
     time: gameTime.value,
     myTeamId: selectedTeamId.value,
     opponentName: opponentName.value,
-    field: fieldName.value
+    field: fieldName.value,
+    myPitcherId: myPitcherId.value || null,
+    opponentPitcherName: opponentPitcher.value.firstName ? 
+      `${opponentPitcher.value.firstName} ${opponentPitcher.value.lastName}`.trim() : null
   })
   
   if (game) {
-    await startGame(game.id, myTeamLineup.value, opponentLineup.value)
+    const pitchers = {
+      myPitcher: myPitcher.value || null,
+      opponentPitcher: opponentPitcher.value.firstName ? opponentPitcher.value : null
+    }
+    await startGame(game.id, myTeamLineup.value, opponentLineup.value, pitchers)
     router.push(`/game/${game.id}/score`)
   }
 }
@@ -163,6 +178,46 @@ async function handleStartGame() {
               placeholder="Field 1"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
+          </div>
+        </div>
+      </section>
+      
+      <!-- Pitchers Section -->
+      <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Pitchers</h2>
+        
+        <div class="space-y-4">
+          <!-- My Team Pitcher -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">My Team's Pitcher</label>
+            <select 
+              v-model="myPitcherId"
+              class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select pitcher (optional)</option>
+              <option v-for="player in myTeamLineup" :key="player.id" :value="player.id">
+                #{{ player.number }} {{ player.firstName }} {{ player.lastName }}
+              </option>
+            </select>
+          </div>
+          
+          <!-- Opponent Pitcher -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Opponent's Pitcher</label>
+            <div class="grid grid-cols-2 gap-2">
+              <input 
+                v-model="opponentPitcher.firstName"
+                type="text" 
+                placeholder="First name"
+                class="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              />
+              <input 
+                v-model="opponentPitcher.lastName"
+                type="text" 
+                placeholder="Last name"
+                class="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
       </section>
