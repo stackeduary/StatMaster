@@ -1,10 +1,62 @@
 # StatMaster Project History
 
+## 2024-12-18 - Supabase Backend & Pitcher Tracking
+
+### Checkpoint 4: Pitcher Selection and Stats Tracking
+
+**Implemented by:** Claude Opus 4.5
+
+**What was added:**
+- Pitcher selection for both teams during game setup
+- Real-time pitching stats tracking (IP, H, R, ER, BB, K, HR, BF)
+- Pitcher display in score strip during live scoring
+- "View Pitching Stats" modal accessible from game menu
+- Fixed base runner placement for doubles (batter on 2nd) and triples (batter on 3rd)
+
+**Database changes (Supabase):**
+- Added `my_pitcher_id` and `opponent_pitcher_name` columns to `games` table
+- Created `pitching_stats` table for tracking pitcher performance
+
+---
+
+### Checkpoint 3: Supabase Integration
+
+**Implemented by:** Claude Opus 4.5
+
+**What was added:**
+- Connected frontend to Supabase PostgreSQL backend
+- Migrated from npm to yarn package manager
+- Deployed frontend to Netlify (https://statmaster.netlify.app)
+- All data now persists to Supabase database
+
+**Database tables created:**
+- `teams` - Team information
+- `players` - Player rosters with team relationships
+- `games` - Game state and scores
+- `plays` - Play-by-play records
+- `pitching_stats` - Pitcher performance tracking
+
+**Files created/modified:**
+- `src/lib/supabase.js` - Supabase client configuration
+- `src/stores/gameStore.js` - Migrated to async Supabase operations
+- `.env` - Environment variables for Supabase credentials
+- `public/_redirects` - SPA routing for Netlify
+
+**Environment variables:**
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+**Deployment:**
+- Frontend: https://statmaster.netlify.app
+- Backend: Supabase (project: StatMaster)
+
+---
+
 ## 2024-12-18 - Light/Dark Mode Toggle Added
 
 ### Checkpoint 2: Theme System Implementation
 
-**Implemented by:** Claude 4.5 Opus
+**Implemented by:** Claude Opus 4.5
 
 **What was added:**
 - Global light/dark mode toggle on every screen
@@ -34,7 +86,7 @@
 
 ### Checkpoint 1: Vue.js + Tailwind CSS Frontend Created
 
-**Implemented by:** Claude 4.5 Opus
+**Implemented by:** Claude Opus 4.5
 
 **What was built:**
 - Complete Vue.js 3 frontend with Vite build system
@@ -84,8 +136,9 @@ yarn dev
 ```
 
 **Next steps:**
-- Connect to FastAPI backend
-- Implement data persistence
+- ~~Connect to FastAPI backend~~ → Using Supabase instead
+- ~~Implement data persistence~~ → Done (Checkpoint 3)
 - Add authentication
-- Refine runner advancement logic
+- ~~Refine runner advancement logic~~ → Done (Checkpoint 4)
 - Add substitution management
+- Add batting stats tracking
