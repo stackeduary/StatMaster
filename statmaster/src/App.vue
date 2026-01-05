@@ -19,7 +19,7 @@ const showBottomNav = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col theme-transition">
+  <div class="min-h-screen bg-background text-foreground flex flex-col theme-transition">
     <!-- Main content area -->
     <main class="flex-1 pb-16" :class="{ 'pb-0': !showBottomNav }">
       <router-view />

@@ -40,79 +40,79 @@ function goToScoring() {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full bg-gray-50 dark:bg-gray-900 theme-transition">
+  <div class="flex flex-col min-h-full bg-background theme-transition">
     <AppBar :title="`${game?.myTeam?.name || 'My Team'} vs ${game?.opponent?.name || 'Opponent'}`" show-back />
     
     <div class="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
       <!-- Header info -->
-      <div class="text-center text-gray-500 text-sm mb-4">
+      <div class="text-center text-muted-foreground text-sm mb-4">
         <p>{{ game?.date }} • {{ game?.field || 'Field' }}</p>
         <span 
           class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium"
-          :class="game?.status === 'final' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+          :class="game?.status === 'final' ? 'bg-secondary text-secondary-foreground' : 'bg-accent text-accent-foreground'"
         >
           {{ game?.status === 'final' ? 'Final' : 'In Progress' }}
         </span>
       </div>
       
       <!-- Score Summary Card -->
-      <div class="bg-white rounded-xl p-6 shadow-sm mb-4">
+      <div class="bg-card rounded-xl p-6 shadow-sm mb-4">
         <div class="flex items-center justify-center gap-6">
           <div class="text-center">
-            <p class="text-sm text-gray-500 mb-1">{{ game?.myTeam?.name || 'My Team' }}</p>
-            <p class="text-4xl font-bold text-gray-900">{{ game?.myTeam?.score || 0 }}</p>
+            <p class="text-sm text-muted-foreground mb-1">{{ game?.myTeam?.name || 'My Team' }}</p>
+            <p class="text-4xl font-bold text-foreground">{{ game?.myTeam?.score || 0 }}</p>
           </div>
           
           <div class="flex flex-col items-center">
             <span 
               class="text-2xl font-bold px-3 py-1 rounded"
-              :class="isWin ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              :class="isWin ? 'bg-green-100 text-green-700' : 'bg-destructive/10 text-destructive'"
             >
               {{ resultBadge }}
             </span>
           </div>
           
           <div class="text-center">
-            <p class="text-sm text-gray-500 mb-1">{{ game?.opponent?.name || 'Opponent' }}</p>
-            <p class="text-4xl font-bold text-gray-900">{{ game?.opponent?.score || 0 }}</p>
+            <p class="text-sm text-muted-foreground mb-1">{{ game?.opponent?.name || 'Opponent' }}</p>
+            <p class="text-4xl font-bold text-foreground">{{ game?.opponent?.score || 0 }}</p>
           </div>
         </div>
       </div>
       
       <!-- Inning-by-Inning Score -->
-      <div class="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
-        <div class="px-4 py-3 border-b border-gray-100">
-          <h3 class="font-semibold text-gray-900">Line Score</h3>
+      <div class="bg-card rounded-xl shadow-sm mb-4 overflow-hidden">
+        <div class="px-4 py-3 border-b border-border">
+          <h3 class="font-semibold text-foreground">Line Score</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-gray-50">
-                <th class="px-3 py-2 text-left font-medium text-gray-500">Team</th>
-                <th v-for="i in 7" :key="i" class="px-2 py-2 text-center font-medium text-gray-500 w-8">{{ i }}</th>
-                <th class="px-3 py-2 text-center font-bold text-gray-700">R</th>
-                <th class="px-3 py-2 text-center font-medium text-gray-500">H</th>
-                <th class="px-3 py-2 text-center font-medium text-gray-500">E</th>
+              <tr class="bg-muted">
+                <th class="px-3 py-2 text-left font-medium text-muted-foreground">Team</th>
+                <th v-for="i in 7" :key="i" class="px-2 py-2 text-center font-medium text-muted-foreground w-8">{{ i }}</th>
+                <th class="px-3 py-2 text-center font-bold text-foreground">R</th>
+                <th class="px-3 py-2 text-center font-medium text-muted-foreground">H</th>
+                <th class="px-3 py-2 text-center font-medium text-muted-foreground">E</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="border-b border-gray-100">
-                <td class="px-3 py-2 font-medium text-gray-900">{{ game?.opponent?.name || 'Away' }}</td>
-                <td v-for="i in 7" :key="i" class="px-2 py-2 text-center text-gray-600">
+              <tr class="border-b border-border">
+                <td class="px-3 py-2 font-medium text-foreground">{{ game?.opponent?.name || 'Away' }}</td>
+                <td v-for="i in 7" :key="i" class="px-2 py-2 text-center text-muted-foreground">
                   {{ currentGame.inningScores?.away?.[i-1] ?? '-' }}
                 </td>
-                <td class="px-3 py-2 text-center font-bold">{{ game?.opponent?.score || 0 }}</td>
-                <td class="px-3 py-2 text-center text-gray-600">8</td>
-                <td class="px-3 py-2 text-center text-gray-600">1</td>
+                <td class="px-3 py-2 text-center font-bold text-foreground">{{ game?.opponent?.score || 0 }}</td>
+                <td class="px-3 py-2 text-center text-muted-foreground">8</td>
+                <td class="px-3 py-2 text-center text-muted-foreground">1</td>
               </tr>
               <tr>
-                <td class="px-3 py-2 font-medium text-gray-900">{{ game?.myTeam?.name || 'Home' }}</td>
-                <td v-for="i in 7" :key="i" class="px-2 py-2 text-center text-gray-600">
+                <td class="px-3 py-2 font-medium text-foreground">{{ game?.myTeam?.name || 'Home' }}</td>
+                <td v-for="i in 7" :key="i" class="px-2 py-2 text-center text-muted-foreground">
                   {{ currentGame.inningScores?.home?.[i-1] ?? '-' }}
                 </td>
-                <td class="px-3 py-2 text-center font-bold">{{ game?.myTeam?.score || 0 }}</td>
-                <td class="px-3 py-2 text-center text-gray-600">12</td>
-                <td class="px-3 py-2 text-center text-gray-600">0</td>
+                <td class="px-3 py-2 text-center font-bold text-foreground">{{ game?.myTeam?.score || 0 }}</td>
+                <td class="px-3 py-2 text-center text-muted-foreground">12</td>
+                <td class="px-3 py-2 text-center text-muted-foreground">0</td>
               </tr>
             </tbody>
           </table>
@@ -120,40 +120,40 @@ function goToScoring() {
       </div>
       
       <!-- Batting Box Score -->
-      <div class="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
-        <div class="px-4 py-3 border-b border-gray-100">
-          <h3 class="font-semibold text-gray-900">{{ game?.myTeam?.name || 'My Team' }} Batting</h3>
+      <div class="bg-card rounded-xl shadow-sm mb-4 overflow-hidden">
+        <div class="px-4 py-3 border-b border-border">
+          <h3 class="font-semibold text-foreground">{{ game?.myTeam?.name || 'My Team' }} Batting</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-gray-50">
-                <th class="px-3 py-2 text-left font-medium text-gray-500">Player</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">AB</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">R</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">H</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">RBI</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">2B</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">HR</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">BB</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">SO</th>
+              <tr class="bg-muted">
+                <th class="px-3 py-2 text-left font-medium text-muted-foreground">Player</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">AB</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">R</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">H</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">RBI</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">2B</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">HR</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">BB</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">SO</th>
               </tr>
             </thead>
             <tbody>
               <tr 
                 v-for="(player, index) in battingStats" 
                 :key="index"
-                class="border-b border-gray-100 last:border-0"
+                class="border-b border-border last:border-0"
               >
-                <td class="px-3 py-2 font-medium text-gray-900">{{ player.name }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.ab }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.r }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.h }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.rbi }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player['2b'] }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.hr }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.bb }}</td>
-                <td class="px-2 py-2 text-center text-gray-600">{{ player.so }}</td>
+                <td class="px-3 py-2 font-medium text-foreground">{{ player.name }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.ab }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.r }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.h }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.rbi }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player['2b'] }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.hr }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.bb }}</td>
+                <td class="px-2 py-2 text-center text-muted-foreground">{{ player.so }}</td>
               </tr>
             </tbody>
           </table>
@@ -165,12 +165,12 @@ function goToScoring() {
         <button 
           v-if="game?.status === 'in_progress'"
           @click="goToScoring"
-          class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 touch-target"
+          class="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium hover:opacity-90 touch-target"
         >
           Continue Scoring
         </button>
         <button 
-          class="w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-300 touch-target"
+          class="w-full bg-secondary text-secondary-foreground py-3 rounded-xl font-medium hover:opacity-90 touch-target"
         >
           Share / Export
         </button>

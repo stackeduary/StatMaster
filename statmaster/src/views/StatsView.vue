@@ -28,7 +28,7 @@ const playerStats = [
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full bg-gray-50 dark:bg-gray-900 theme-transition">
+  <div class="flex flex-col min-h-full bg-background theme-transition">
     <AppBar title="Stats" />
     
     <div class="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
@@ -36,7 +36,7 @@ const playerStats = [
       <div class="flex gap-3 mb-4">
         <select 
           v-model="selectedTeamId"
-          class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          class="flex-1 px-3 py-2 bg-card text-foreground border border-border rounded-lg focus:ring-2 focus:ring-ring"
         >
           <option v-for="team in teams" :key="team.id" :value="team.id">
             {{ team.name }}
@@ -44,7 +44,7 @@ const playerStats = [
         </select>
         <select 
           v-model="selectedSeason"
-          class="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          class="px-3 py-2 bg-card text-foreground border border-border rounded-lg focus:ring-2 focus:ring-ring"
         >
           <option value="2024">2024</option>
           <option value="2023">2023</option>
@@ -53,49 +53,49 @@ const playerStats = [
       
       <!-- Team Summary Tiles -->
       <div class="grid grid-cols-3 gap-3 mb-6">
-        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-          <p class="text-xs text-gray-500 uppercase mb-1">Record</p>
-          <p class="text-xl font-bold text-gray-900">{{ teamStats.record }}</p>
+        <div class="bg-card rounded-xl p-4 shadow-sm text-center">
+          <p class="text-xs text-muted-foreground uppercase mb-1">Record</p>
+          <p class="text-xl font-bold text-foreground">{{ teamStats.record }}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-          <p class="text-xs text-gray-500 uppercase mb-1">Runs For</p>
+        <div class="bg-card rounded-xl p-4 shadow-sm text-center">
+          <p class="text-xs text-muted-foreground uppercase mb-1">Runs For</p>
           <p class="text-xl font-bold text-green-600">{{ teamStats.runsFor }}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-          <p class="text-xs text-gray-500 uppercase mb-1">Runs Against</p>
-          <p class="text-xl font-bold text-red-600">{{ teamStats.runsAgainst }}</p>
+        <div class="bg-card rounded-xl p-4 shadow-sm text-center">
+          <p class="text-xs text-muted-foreground uppercase mb-1">Runs Against</p>
+          <p class="text-xl font-bold text-destructive">{{ teamStats.runsAgainst }}</p>
         </div>
       </div>
       
       <!-- Player Stats List -->
-      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="px-4 py-3 border-b border-gray-100">
-          <h3 class="font-semibold text-gray-900">Batting Leaders</h3>
+      <div class="bg-card rounded-xl shadow-sm overflow-hidden">
+        <div class="px-4 py-3 border-b border-border">
+          <h3 class="font-semibold text-foreground">Batting Leaders</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-gray-50">
-                <th class="px-3 py-2 text-left font-medium text-gray-500">Player</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">AVG</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">OBP</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">SLG</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">HR</th>
-                <th class="px-2 py-2 text-center font-medium text-gray-500">RBI</th>
+              <tr class="bg-muted">
+                <th class="px-3 py-2 text-left font-medium text-muted-foreground">Player</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">AVG</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">OBP</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">SLG</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">HR</th>
+                <th class="px-2 py-2 text-center font-medium text-muted-foreground">RBI</th>
               </tr>
             </thead>
             <tbody>
               <tr 
                 v-for="(player, index) in playerStats" 
                 :key="index"
-                class="border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer"
+                class="border-b border-border last:border-0 hover:bg-muted cursor-pointer"
               >
-                <td class="px-3 py-3 font-medium text-gray-900">{{ player.name }}</td>
-                <td class="px-2 py-3 text-center text-gray-600 font-mono">{{ player.avg }}</td>
-                <td class="px-2 py-3 text-center text-gray-600 font-mono">{{ player.obp }}</td>
-                <td class="px-2 py-3 text-center text-gray-600 font-mono">{{ player.slg }}</td>
-                <td class="px-2 py-3 text-center text-gray-600">{{ player.hr }}</td>
-                <td class="px-2 py-3 text-center text-gray-600">{{ player.rbi }}</td>
+                <td class="px-3 py-3 font-medium text-foreground">{{ player.name }}</td>
+                <td class="px-2 py-3 text-center text-muted-foreground font-mono">{{ player.avg }}</td>
+                <td class="px-2 py-3 text-center text-muted-foreground font-mono">{{ player.obp }}</td>
+                <td class="px-2 py-3 text-center text-muted-foreground font-mono">{{ player.slg }}</td>
+                <td class="px-2 py-3 text-center text-muted-foreground">{{ player.hr }}</td>
+                <td class="px-2 py-3 text-center text-muted-foreground">{{ player.rbi }}</td>
               </tr>
             </tbody>
           </table>

@@ -57,20 +57,20 @@ function createNewGame() {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full bg-gray-50 dark:bg-gray-900 theme-transition">
+  <div class="flex flex-col min-h-full bg-background theme-transition">
     <AppBar title="Games" right-icon="plus" @right-action="createNewGame" />
     
     <div class="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
       <!-- Empty state -->
       <div v-if="games.length === 0" class="flex flex-col items-center justify-center py-16">
-        <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-16 h-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10" stroke-width="2" />
           <path stroke-linecap="round" stroke-width="2" d="M12 2c-2 4-2 8 0 10s2 6 0 10" />
         </svg>
-        <p class="text-gray-500 dark:text-gray-400 mb-4">No games yet.</p>
+        <p class="text-muted-foreground mb-4">No games yet.</p>
         <button 
           @click="createNewGame"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 active:scale-95 transition-all touch-target"
+          class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:opacity-90 active:scale-95 transition-all touch-target"
         >
           Create Your First Game
         </button>
@@ -80,16 +80,16 @@ function createNewGame() {
       <div v-else>
         <!-- Today / Upcoming section -->
         <section v-if="todayGames.length > 0" class="mb-6">
-          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Today</h2>
+          <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Today</h2>
           <div class="space-y-3">
             <button
               v-for="game in todayGames"
               :key="game.id"
               @click="handleGameClick(game)"
-              class="w-full bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-left hover:shadow-md active:scale-[0.98] transition-all touch-target"
+              class="w-full bg-card text-card-foreground rounded-xl p-4 shadow-sm border border-border text-left hover:shadow-md active:scale-[0.98] transition-all touch-target"
             >
               <div class="flex items-center justify-between mb-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ game.time }}</span>
+                <span class="text-sm text-muted-foreground">{{ game.time }}</span>
                 <span 
                   class="text-xs font-medium px-2 py-1 rounded-full"
                   :class="getStatusColor(game.status)"
@@ -99,34 +99,34 @@ function createNewGame() {
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="font-semibold text-gray-900 dark:text-white">{{ game.myTeam.name }}</p>
-                  <p class="text-gray-600 dark:text-gray-300">vs {{ game.opponent.name }}</p>
+                  <p class="font-semibold text-foreground">{{ game.myTeam.name }}</p>
+                  <p class="text-muted-foreground">vs {{ game.opponent.name }}</p>
                 </div>
                 <div v-if="game.status !== 'upcoming'" class="text-right">
-                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p class="text-2xl font-bold text-foreground">
                     {{ game.myTeam.score }} - {{ game.opponent.score }}
                   </p>
                 </div>
               </div>
-              <p v-if="game.field" class="text-sm text-gray-400 dark:text-gray-500 mt-2">{{ game.field }}</p>
+              <p v-if="game.field" class="text-sm text-muted-foreground mt-2">{{ game.field }}</p>
             </button>
           </div>
         </section>
         
         <!-- Recent games section -->
         <section v-if="recentGames.length > 0">
-          <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Recent Games</h2>
+          <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recent Games</h2>
           <div class="space-y-2">
             <button
               v-for="game in recentGames"
               :key="game.id"
               @click="handleGameClick(game)"
-              class="w-full bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700 text-left hover:shadow-md active:scale-[0.98] transition-all touch-target"
+              class="w-full bg-card text-card-foreground rounded-lg p-3 shadow-sm border border-border text-left hover:shadow-md active:scale-[0.98] transition-all touch-target"
             >
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ game.date }}</p>
-                  <p class="font-medium text-gray-900 dark:text-white">vs {{ game.opponent.name }}</p>
+                  <p class="text-sm text-muted-foreground">{{ game.date }}</p>
+                  <p class="font-medium text-foreground">vs {{ game.opponent.name }}</p>
                 </div>
                 <div class="text-right">
                   <span 
@@ -146,7 +146,7 @@ function createNewGame() {
         <div v-if="todayGames.length === 0" class="mt-6">
           <button 
             @click="createNewGame"
-            class="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-medium hover:bg-blue-700 active:scale-95 transition-all touch-target flex items-center justify-center gap-2"
+            class="w-full bg-primary text-primary-foreground px-6 py-4 rounded-xl font-medium hover:opacity-90 active:scale-95 transition-all touch-target flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

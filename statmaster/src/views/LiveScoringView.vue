@@ -236,11 +236,11 @@ function getPlayDescription(play) {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white theme-transition">
+  <div class="flex flex-col h-screen bg-background text-foreground theme-transition">
     <!-- Top Game Bar -->
-    <header class="bg-white dark:bg-gray-800 px-3 py-3 flex items-center justify-between safe-area-top border-b border-gray-200 dark:border-gray-700">
+    <header class="bg-card px-3 py-3 flex items-center justify-between safe-area-top border-b border-border">
       <div class="flex items-center gap-1">
-        <button @click="goBack" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button @click="goBack" class="p-2 rounded-full hover:bg-muted">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
@@ -250,11 +250,11 @@ function getPlayDescription(play) {
       
       <div class="text-center">
         <p class="text-lg font-bold">{{ inningDisplay }}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ currentGame.outs }} Out{{ currentGame.outs !== 1 ? 's' : '' }}</p>
+        <p class="text-sm text-muted-foreground">{{ currentGame.outs }} Out{{ currentGame.outs !== 1 ? 's' : '' }}</p>
       </div>
       
       <div class="relative">
-        <button @click="showMenu = !showMenu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button @click="showMenu = !showMenu" class="p-2 rounded-full hover:bg-muted">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
           </svg>
@@ -263,23 +263,23 @@ function getPlayDescription(play) {
         <!-- Dropdown menu -->
         <div 
           v-if="showMenu"
-          class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 min-w-48 z-50 border border-gray-200 dark:border-gray-600"
+          class="absolute right-0 top-full mt-1 bg-card rounded-lg shadow-lg py-1 min-w-48 z-50 border border-border"
         >
           <button 
             @click="showPitchingStats = true; showMenu = false"
-            class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
+            class="w-full px-4 py-3 text-left hover:bg-muted text-sm"
           >
             View Pitching Stats
           </button>
           <button 
             @click="handleEndInning"
-            class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
+            class="w-full px-4 py-3 text-left hover:bg-muted text-sm"
           >
             End Inning
           </button>
           <button 
             @click="handleEndGame"
-            class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-sm text-red-600 dark:text-red-400"
+            class="w-full px-4 py-3 text-left hover:bg-destructive text-sm text-destructive"
           >
             End Game
           </button>
@@ -288,26 +288,26 @@ function getPlayDescription(play) {
     </header>
     
     <!-- Score Strip -->
-    <div class="bg-gray-200 dark:bg-gray-800 px-4 py-2 flex items-center justify-center gap-8 border-b border-gray-300 dark:border-gray-700">
+    <div class="bg-muted px-4 py-2 flex items-center justify-center gap-8 border-b border-border">
       <div class="text-center">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ currentGame.opponent.name || 'Away' }}</p>
+        <p class="text-xs text-muted-foreground uppercase">{{ currentGame.opponent.name || 'Away' }}</p>
         <p class="text-2xl font-bold">{{ currentGame.opponent.score }}</p>
-        <p v-if="currentGame.opponent.pitcher" class="text-xs text-gray-400 dark:text-gray-500">
+        <p v-if="currentGame.opponent.pitcher" class="text-xs text-muted-foreground">
           P: {{ currentGame.opponent.pitcher.firstName }} {{ currentGame.opponent.pitcher.lastName?.charAt(0) || '' }}
         </p>
       </div>
-      <div class="text-gray-400 dark:text-gray-500">-</div>
+      <div class="text-muted-foreground">-</div>
       <div class="text-center">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ currentGame.myTeam.name || 'Home' }}</p>
+        <p class="text-xs text-muted-foreground uppercase">{{ currentGame.myTeam.name || 'Home' }}</p>
         <p class="text-2xl font-bold">{{ currentGame.myTeam.score }}</p>
-        <p v-if="currentGame.myTeam.pitcher" class="text-xs text-gray-400 dark:text-gray-500">
+        <p v-if="currentGame.myTeam.pitcher" class="text-xs text-muted-foreground">
           P: {{ currentGame.myTeam.pitcher.firstName }} {{ currentGame.myTeam.pitcher.lastName?.charAt(0) || '' }}
         </p>
       </div>
     </div>
     
     <!-- Base State & Count Panel -->
-    <div class="bg-white dark:bg-gray-800 px-4 py-4 flex items-center justify-around border-b border-gray-200 dark:border-gray-700">
+    <div class="bg-card px-4 py-4 flex items-center justify-around border-b border-border">
       <!-- Base Diamond -->
       <BaseDiamond :bases="currentGame.bases" size="md" />
       
@@ -315,36 +315,36 @@ function getPlayDescription(play) {
       <div class="text-center">
         <div class="flex items-center gap-4 mb-2">
           <div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Balls</p>
+            <p class="text-xs text-muted-foreground mb-1">Balls</p>
             <div class="flex gap-1">
               <span 
                 v-for="i in 4" 
                 :key="'b'+i"
                 class="w-3 h-3 rounded-full"
-                :class="i <= currentGame.balls ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'"
+                :class="i <= currentGame.balls ? 'bg-green-500' : 'bg-muted'"
               />
             </div>
           </div>
           <div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Strikes</p>
+            <p class="text-xs text-muted-foreground mb-1">Strikes</p>
             <div class="flex gap-1">
               <span 
                 v-for="i in 3" 
                 :key="'s'+i"
                 class="w-3 h-3 rounded-full"
-                :class="i <= currentGame.strikes ? 'bg-yellow-500' : 'bg-gray-300 dark:bg-gray-600'"
+                :class="i <= currentGame.strikes ? 'bg-yellow-500' : 'bg-muted'"
               />
             </div>
           </div>
         </div>
         <div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Outs</p>
+          <p class="text-xs text-muted-foreground mb-1">Outs</p>
           <div class="flex gap-1 justify-center">
             <span 
               v-for="i in 3" 
               :key="'o'+i"
               class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white"
-              :class="i <= currentGame.outs ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'"
+              :class="i <= currentGame.outs ? 'bg-red-500' : 'bg-muted'"
             >
               {{ i <= currentGame.outs ? '✕' : '' }}
             </span>
@@ -354,14 +354,14 @@ function getPlayDescription(play) {
     </div>
     
     <!-- Current Batter Panel -->
-    <div class="bg-blue-600 px-4 py-3">
-      <div class="flex items-center justify-between text-white">
+    <div class="bg-primary px-4 py-3">
+      <div class="flex items-center justify-between text-primary-foreground">
         <div>
-          <p class="text-xs text-blue-200 uppercase">Now Batting</p>
+          <p class="text-xs text-primary-foreground/70 uppercase">Now Batting</p>
           <p class="text-lg font-bold">{{ batterDisplay.name }}</p>
         </div>
         <div class="text-right">
-          <p class="text-xs text-blue-200">
+          <p class="text-xs text-primary-foreground/70">
             #{{ currentGame.currentBatterIndex + 1 }} of {{ battingTeamLineup.length }}
           </p>
         </div>
@@ -369,10 +369,10 @@ function getPlayDescription(play) {
     </div>
     
     <!-- Scoring Actions Grid -->
-    <div class="flex-1 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto">
+    <div class="flex-1 bg-background p-4 overflow-y-auto">
       <!-- Hit outcomes -->
       <div class="mb-4">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-2 font-semibold">Hits</p>
+        <p class="text-xs text-muted-foreground uppercase mb-2 font-semibold">Hits</p>
         <div class="grid grid-cols-4 gap-2">
           <button
             v-for="action in hitActions"
@@ -388,7 +388,7 @@ function getPlayDescription(play) {
       
       <!-- Out outcomes -->
       <div class="mb-4">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-2 font-semibold">Outs</p>
+        <p class="text-xs text-muted-foreground uppercase mb-2 font-semibold">Outs</p>
         <div class="grid grid-cols-4 gap-2">
           <button
             v-for="action in outActions"
@@ -404,7 +404,7 @@ function getPlayDescription(play) {
       
       <!-- Other outcomes -->
       <div class="mb-4">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-2 font-semibold">Other</p>
+        <p class="text-xs text-muted-foreground uppercase mb-2 font-semibold">Other</p>
         <div class="grid grid-cols-4 gap-2">
           <button
             v-for="action in otherActions"
@@ -420,20 +420,20 @@ function getPlayDescription(play) {
       
       <!-- Play-by-Play Log -->
       <div class="mt-4">
-        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-2 font-semibold">Recent Plays</p>
-        <div class="bg-white dark:bg-gray-800 rounded-xl max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-700">
-          <div v-if="currentGame.plays.length === 0" class="p-4 text-center text-gray-400 text-sm">
+        <p class="text-xs text-muted-foreground uppercase mb-2 font-semibold">Recent Plays</p>
+        <div class="bg-card rounded-xl max-h-32 overflow-y-auto border border-border">
+          <div v-if="currentGame.plays.length === 0" class="p-4 text-center text-muted-foreground text-sm">
             No plays yet
           </div>
-          <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
+          <div v-else class="divide-y divide-border">
             <div 
               v-for="play in [...currentGame.plays].reverse().slice(0, 5)" 
               :key="play.id"
               class="px-4 py-2 text-sm"
             >
-              <span class="text-gray-500 dark:text-gray-400">{{ play.isTop ? 'T' : 'B' }}{{ play.inning }}:</span>
+              <span class="text-muted-foreground">{{ play.isTop ? 'T' : 'B' }}{{ play.inning }}:</span>
               {{ getPlayDescription(play) }}
-              <span v-if="play.runsScored" class="text-green-600 dark:text-green-400 ml-1">
+              <span v-if="play.runsScored" class="text-green-600 ml-1">
                 (+{{ play.runsScored }} R)
               </span>
             </div>
@@ -443,11 +443,11 @@ function getPlayDescription(play) {
     </div>
     
     <!-- Undo Button -->
-    <div class="bg-white dark:bg-gray-800 px-4 py-3 safe-area-bottom border-t border-gray-200 dark:border-gray-700">
+    <div class="bg-card px-4 py-3 safe-area-bottom border-t border-border">
       <button 
         @click="handleUndo"
         :disabled="currentGame.plays.length === 0"
-        class="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white py-3 rounded-xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target flex items-center justify-center gap-2"
+        class="w-full bg-muted text-foreground py-3 rounded-xl font-medium hover:bg-accent active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target flex items-center justify-center gap-2"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -462,17 +462,17 @@ function getPlayDescription(play) {
       class="fixed inset-0 bg-black/70 z-50 flex items-end justify-center"
       @click.self="showRunnerModal = false"
     >
-      <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-t-2xl p-4 pb-8">
+      <div class="bg-card w-full max-w-lg rounded-t-2xl p-4 pb-8">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Runner Advancement</h3>
-          <button @click="showRunnerModal = false" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">
+          <h3 class="text-lg font-semibold text-foreground">Runner Advancement</h3>
+          <button @click="showRunnerModal = false" class="p-2 hover:bg-muted rounded-full text-muted-foreground">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        <p class="text-muted-foreground text-sm mb-4">
           {{ pendingPlay?.label }} by {{ batterDisplay.name }}
         </p>
         
@@ -480,7 +480,7 @@ function getPlayDescription(play) {
         <div class="space-y-2">
           <button 
             @click="confirmRunnerAdvancement(0, getDefaultPlayResult(pendingPlay?.type).newBases)"
-            class="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white py-3 rounded-xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 active:scale-95 transition-all"
+            class="w-full bg-muted text-foreground py-3 rounded-xl font-medium hover:bg-accent active:scale-95 transition-all"
           >
             No runs scored
           </button>
@@ -507,10 +507,10 @@ function getPlayDescription(play) {
       class="fixed inset-0 bg-black/70 z-50 flex items-end justify-center"
       @click.self="showPitchingStats = false"
     >
-      <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto">
+      <div class="bg-card w-full max-w-lg rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pitching Stats</h3>
-          <button @click="showPitchingStats = false" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">
+          <h3 class="text-lg font-semibold text-foreground">Pitching Stats</h3>
+          <button @click="showPitchingStats = false" class="p-2 hover:bg-muted rounded-full text-muted-foreground">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -519,47 +519,47 @@ function getPlayDescription(play) {
         
         <!-- My Team Pitcher Stats -->
         <div v-if="currentGame.pitchingStats.myTeam?.pitcher" class="mb-6">
-          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+          <h4 class="text-sm font-semibold text-muted-foreground uppercase mb-2">
             {{ currentGame.myTeam.name }} Pitcher
           </h4>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
-            <p class="font-medium text-gray-900 dark:text-white mb-3">
+          <div class="bg-muted rounded-xl p-4">
+            <p class="font-medium text-foreground mb-3">
               #{{ currentGame.pitchingStats.myTeam.pitcher.number }} 
               {{ currentGame.pitchingStats.myTeam.pitcher.firstName }} 
               {{ currentGame.pitchingStats.myTeam.pitcher.lastName }}
             </p>
             <div class="grid grid-cols-4 gap-3 text-center">
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.inningsPitched }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">IP</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.inningsPitched }}</p>
+                <p class="text-xs text-muted-foreground">IP</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.hitsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">H</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.hitsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">H</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.runsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">R</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.runsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">R</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.earnedRuns }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">ER</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.earnedRuns }}</p>
+                <p class="text-xs text-muted-foreground">ER</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.walks }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">BB</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.walks }}</p>
+                <p class="text-xs text-muted-foreground">BB</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.strikeouts }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">K</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.strikeouts }}</p>
+                <p class="text-xs text-muted-foreground">K</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.homeRunsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">HR</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.homeRunsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">HR</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.myTeam.battersFaced }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">BF</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.myTeam.battersFaced }}</p>
+                <p class="text-xs text-muted-foreground">BF</p>
               </div>
             </div>
           </div>
@@ -567,46 +567,46 @@ function getPlayDescription(play) {
         
         <!-- Opponent Pitcher Stats -->
         <div v-if="currentGame.pitchingStats.opponent?.pitcher">
-          <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+          <h4 class="text-sm font-semibold text-muted-foreground uppercase mb-2">
             {{ currentGame.opponent.name }} Pitcher
           </h4>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
-            <p class="font-medium text-gray-900 dark:text-white mb-3">
+          <div class="bg-muted rounded-xl p-4">
+            <p class="font-medium text-foreground mb-3">
               {{ currentGame.pitchingStats.opponent.pitcher.firstName }} 
               {{ currentGame.pitchingStats.opponent.pitcher.lastName }}
             </p>
             <div class="grid grid-cols-4 gap-3 text-center">
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.inningsPitched }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">IP</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.inningsPitched }}</p>
+                <p class="text-xs text-muted-foreground">IP</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.hitsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">H</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.hitsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">H</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.runsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">R</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.runsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">R</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.earnedRuns }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">ER</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.earnedRuns }}</p>
+                <p class="text-xs text-muted-foreground">ER</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.walks }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">BB</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.walks }}</p>
+                <p class="text-xs text-muted-foreground">BB</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.strikeouts }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">K</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.strikeouts }}</p>
+                <p class="text-xs text-muted-foreground">K</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.homeRunsAllowed }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">HR</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.homeRunsAllowed }}</p>
+                <p class="text-xs text-muted-foreground">HR</p>
               </div>
               <div>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">{{ currentGame.pitchingStats.opponent.battersFaced }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">BF</p>
+                <p class="text-xl font-bold text-foreground">{{ currentGame.pitchingStats.opponent.battersFaced }}</p>
+                <p class="text-xs text-muted-foreground">BF</p>
               </div>
             </div>
           </div>
@@ -614,7 +614,7 @@ function getPlayDescription(play) {
         
         <!-- No pitchers message -->
         <div v-if="!currentGame.pitchingStats.myTeam?.pitcher && !currentGame.pitchingStats.opponent?.pitcher" 
-             class="text-center py-8 text-gray-500 dark:text-gray-400">
+             class="text-center py-8 text-muted-foreground">
           No pitchers selected for this game
         </div>
       </div>

@@ -8,7 +8,7 @@ const { isDark, toggleTheme } = useTheme()
   <button
     @click="toggleTheme"
     class="p-2.5 rounded-full transition-colors touch-target flex items-center justify-center"
-    :class="isDark ? 'bg-gray-700 hover:bg-gray-600 text-yellow-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'"
+    :class="isDark ? 'bg-muted hover:bg-accent text-accent-foreground' : 'bg-muted hover:bg-accent text-muted-foreground'"
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
   >
     <!-- Sun icon (shown in dark mode) -->

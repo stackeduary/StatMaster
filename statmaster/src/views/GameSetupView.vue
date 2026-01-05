@@ -118,41 +118,41 @@ async function handleStartGame() {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full bg-gray-50 dark:bg-gray-900 theme-transition">
+  <div class="flex flex-col min-h-full bg-background theme-transition">
     <AppBar title="New Game" show-back />
     
     <div class="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
       <!-- Game Info Section -->
-      <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Game Info</h2>
+      <section class="bg-card rounded-xl p-4 shadow-sm mb-4">
+        <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">Game Info</h2>
         
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Date</label>
               <input 
                 v-model="gameDate"
                 type="date" 
-                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2.5 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Time</label>
               <input 
                 v-model="gameTime"
                 type="text" 
                 placeholder="7:00 PM"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">My Team</label>
+            <label class="block text-sm font-medium text-foreground mb-1">My Team</label>
             <select 
               v-model="selectedTeamId"
               @change="initializeLineup"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
             >
               <option v-for="team in teams" :key="team.id" :value="team.id">
                 {{ team.name }}
@@ -161,38 +161,38 @@ async function handleStartGame() {
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Opponent *</label>
+            <label class="block text-sm font-medium text-foreground mb-1">Opponent *</label>
             <input 
               v-model="opponentName"
               type="text" 
               placeholder="Enter opponent team name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
             />
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Field (optional)</label>
+            <label class="block text-sm font-medium text-foreground mb-1">Field (optional)</label>
             <input 
               v-model="fieldName"
               type="text" 
               placeholder="Field 1"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>
       </section>
       
       <!-- Pitchers Section -->
-      <section class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Pitchers</h2>
+      <section class="bg-card rounded-xl p-4 shadow-sm mb-4">
+        <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">Pitchers</h2>
         
         <div class="space-y-4">
           <!-- My Team Pitcher -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">My Team's Pitcher</label>
+            <label class="block text-sm font-medium text-foreground mb-1">My Team's Pitcher</label>
             <select 
               v-model="myPitcherId"
-              class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2.5 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
             >
               <option value="">Select pitcher (optional)</option>
               <option v-for="player in myTeamLineup" :key="player.id" :value="player.id">
@@ -203,19 +203,19 @@ async function handleStartGame() {
           
           <!-- Opponent Pitcher -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Opponent's Pitcher</label>
+            <label class="block text-sm font-medium text-foreground mb-1">Opponent's Pitcher</label>
             <div class="grid grid-cols-2 gap-2">
               <input 
                 v-model="opponentPitcher.firstName"
                 type="text" 
                 placeholder="First name"
-                class="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                class="px-3 py-2.5 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
               <input 
                 v-model="opponentPitcher.lastName"
                 type="text" 
                 placeholder="Last name"
-                class="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                class="px-3 py-2.5 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
           </div>
@@ -223,19 +223,19 @@ async function handleStartGame() {
       </section>
       
       <!-- My Team Lineup Section -->
-      <section class="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+      <section class="bg-card rounded-xl shadow-sm mb-4 overflow-hidden">
         <button 
           @click="showMyTeamLineup = !showMyTeamLineup"
-          class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+          class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted"
         >
           <div class="flex items-center gap-2">
-            <h2 class="text-sm font-semibold text-gray-700">My Team Lineup</h2>
-            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+            <h2 class="text-sm font-semibold text-foreground">My Team Lineup</h2>
+            <span class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
               {{ myTeamLineup.length }} players
             </span>
           </div>
           <svg 
-            class="w-5 h-5 text-gray-400 transition-transform"
+            class="w-5 h-5 text-muted-foreground transition-transform"
             :class="{ 'rotate-180': showMyTeamLineup }"
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
           >
@@ -243,25 +243,25 @@ async function handleStartGame() {
           </svg>
         </button>
         
-        <div v-if="showMyTeamLineup" class="border-t border-gray-100">
-          <div class="divide-y divide-gray-100">
+        <div v-if="showMyTeamLineup" class="border-t border-border">
+          <div class="divide-y divide-border">
             <div 
               v-for="(player, index) in myTeamLineup" 
               :key="player.id"
               class="px-4 py-3 flex items-center gap-3"
             >
-              <span class="text-sm text-gray-400 w-6">{{ index + 1 }}</span>
+              <span class="text-sm text-muted-foreground w-6">{{ index + 1 }}</span>
               <div class="flex-1">
-                <p class="font-medium text-gray-900">
+                <p class="font-medium text-foreground">
                   #{{ player.number }} {{ player.firstName }} {{ player.lastName }}
                 </p>
-                <p class="text-sm text-gray-500">{{ player.position }}</p>
+                <p class="text-sm text-muted-foreground">{{ player.position }}</p>
               </div>
               <div class="flex items-center gap-1">
                 <button 
                   @click="movePlayer(myTeamLineup, index, -1)"
                   :disabled="index === 0"
-                  class="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                  class="p-1 rounded hover:bg-muted disabled:opacity-30"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -270,7 +270,7 @@ async function handleStartGame() {
                 <button 
                   @click="movePlayer(myTeamLineup, index, 1)"
                   :disabled="index === myTeamLineup.length - 1"
-                  class="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+                  class="p-1 rounded hover:bg-muted disabled:opacity-30"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -278,7 +278,7 @@ async function handleStartGame() {
                 </button>
                 <button 
                   @click="removePlayer(myTeamLineup, index)"
-                  class="p-1 rounded hover:bg-red-50 text-red-500"
+                  class="p-1 rounded hover:bg-destructive/10 text-destructive"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -289,7 +289,7 @@ async function handleStartGame() {
           </div>
           <button 
             @click="openAddPlayer('my')"
-            class="w-full px-4 py-3 text-blue-600 font-medium text-sm hover:bg-blue-50 flex items-center justify-center gap-2"
+            class="w-full px-4 py-3 text-primary font-medium text-sm hover:bg-primary/10 flex items-center justify-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -300,19 +300,19 @@ async function handleStartGame() {
       </section>
       
       <!-- Opponent Lineup Section -->
-      <section class="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+      <section class="bg-card rounded-xl shadow-sm mb-4 overflow-hidden">
         <button 
           @click="showOpponentLineup = !showOpponentLineup"
-          class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+          class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted"
         >
           <div class="flex items-center gap-2">
-            <h2 class="text-sm font-semibold text-gray-700">Opponent Lineup</h2>
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+            <h2 class="text-sm font-semibold text-foreground">Opponent Lineup</h2>
+            <span class="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
               {{ opponentLineup.length }} players
             </span>
           </div>
           <svg 
-            class="w-5 h-5 text-gray-400 transition-transform"
+            class="w-5 h-5 text-muted-foreground transition-transform"
             :class="{ 'rotate-180': showOpponentLineup }"
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
           >
@@ -320,25 +320,25 @@ async function handleStartGame() {
           </svg>
         </button>
         
-        <div v-if="showOpponentLineup" class="border-t border-gray-100">
-          <p v-if="opponentLineup.length === 0" class="px-4 py-6 text-center text-gray-400 text-sm">
+        <div v-if="showOpponentLineup" class="border-t border-border">
+          <p v-if="opponentLineup.length === 0" class="px-4 py-6 text-center text-muted-foreground text-sm">
             Optional: Add opponent players for detailed tracking
           </p>
-          <div v-else class="divide-y divide-gray-100">
+          <div v-else class="divide-y divide-border">
             <div 
               v-for="(player, index) in opponentLineup" 
               :key="player.id"
               class="px-4 py-3 flex items-center gap-3"
             >
-              <span class="text-sm text-gray-400 w-6">{{ index + 1 }}</span>
+              <span class="text-sm text-muted-foreground w-6">{{ index + 1 }}</span>
               <div class="flex-1">
-                <p class="font-medium text-gray-900">
+                <p class="font-medium text-foreground">
                   #{{ player.number }} {{ player.firstName }} {{ player.lastName }}
                 </p>
               </div>
               <button 
                 @click="removePlayer(opponentLineup, index)"
-                class="p-1 rounded hover:bg-red-50 text-red-500"
+                class="p-1 rounded hover:bg-destructive/10 text-destructive"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -348,7 +348,7 @@ async function handleStartGame() {
           </div>
           <button 
             @click="openAddPlayer('opponent')"
-            class="w-full px-4 py-3 text-blue-600 font-medium text-sm hover:bg-blue-50 flex items-center justify-center gap-2"
+            class="w-full px-4 py-3 text-primary font-medium text-sm hover:bg-primary/10 flex items-center justify-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -359,17 +359,17 @@ async function handleStartGame() {
       </section>
       
       <!-- Validation message -->
-      <p v-if="!canStartGame" class="text-sm text-amber-600 text-center mb-4">
+      <p v-if="!canStartGame" class="text-sm text-destructive text-center mb-4">
         Please add opponent name and at least one player to your lineup
       </p>
     </div>
     
     <!-- Sticky start button -->
-    <div class="sticky bottom-16 px-4 pb-4 bg-gradient-to-t from-gray-50 pt-4">
+    <div class="sticky bottom-16 px-4 pb-4 bg-gradient-to-t from-background pt-4">
       <button 
         @click="handleStartGame"
         :disabled="!canStartGame"
-        class="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed touch-target"
+        class="w-full bg-primary text-primary-foreground py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-target"
       >
         Start Scoring
       </button>
@@ -381,10 +381,10 @@ async function handleStartGame() {
       class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
       @click.self="showAddPlayer = false"
     >
-      <div class="bg-white w-full max-w-lg rounded-t-2xl p-4 pb-8 safe-area-bottom">
+      <div class="bg-card w-full max-w-lg rounded-t-2xl p-4 pb-8 safe-area-bottom">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold">Add Player</h3>
-          <button @click="showAddPlayer = false" class="p-2 hover:bg-gray-100 rounded-full">
+          <h3 class="text-lg font-semibold text-foreground">Add Player</h3>
+          <button @click="showAddPlayer = false" class="p-2 hover:bg-muted rounded-full">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -394,40 +394,40 @@ async function handleStartGame() {
         <div class="space-y-4">
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Number</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Number</label>
               <input 
                 v-model="newPlayer.number"
                 type="text" 
                 placeholder="#"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
             <div class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Position</label>
               <input 
                 v-model="newPlayer.position"
                 type="text" 
                 placeholder="SS, CF, etc."
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label class="block text-sm font-medium text-foreground mb-1">First Name</label>
               <input 
                 v-model="newPlayer.firstName"
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Last Name</label>
               <input 
                 v-model="newPlayer.lastName"
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-border rounded-lg bg-input text-foreground focus:ring-2 focus:ring-ring"
               />
             </div>
           </div>
@@ -435,7 +435,7 @@ async function handleStartGame() {
           <button 
             @click="addPlayer"
             :disabled="!newPlayer.firstName"
-            class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 touch-target"
+            class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 touch-target"
           >
             Add Player
           </button>
